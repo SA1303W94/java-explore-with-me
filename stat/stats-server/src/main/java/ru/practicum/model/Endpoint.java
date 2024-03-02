@@ -1,20 +1,17 @@
 package ru.practicum.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
-@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "endpoints")
+@Getter
+@Setter
 public class Endpoint {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "endpoint_id")
@@ -25,5 +22,4 @@ public class Endpoint {
 
     @Column(name = "uri")
     private String uri;
-
 }

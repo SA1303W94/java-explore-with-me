@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.constant.FormatConstants;
 import ru.practicum.dto.HitDto;
 import ru.practicum.dto.StatDto;
 import ru.practicum.service.StatServiceImpl;
@@ -18,11 +20,11 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class StatsController {
 
-    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-
     private final StatServiceImpl statService;
+
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
@@ -32,13 +34,12 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    @ResponseStatus(HttpStatus.OK)
-    public List<StatDto> getStats(@NotNull @PastOrPresent @DateTimeFormat(pattern = DATE_TIME_PATTERN)
+    public List<StatDto> getStats(@NotNull @PastOrPresent @DateTimeFormat(pattern = FormatConstants.DATE_TIME_PATTERN)
                                   @RequestParam LocalDateTime start,
-                                  @NotNull @DateTimeFormat(pattern = DATE_TIME_PATTERN)
+                                  @NotNull @DateTimeFormat(pattern = FormatConstants.DATE_TIME_PATTERN)
                                   @RequestParam LocalDateTime end,
                                   @RequestParam(required = false) List<String> uris,
-                                  @RequestParam(required = false, defaultValue = "false") Boolean unique) {
+                                  @RequestParam(defaultValue = "false") Boolean unique) {
         log.info("Stat-server: GET stats start={}, end={}, uris={}, unique={}", start, end, uris, unique);
         return statService.getStats(start, end, uris, unique);
     }
