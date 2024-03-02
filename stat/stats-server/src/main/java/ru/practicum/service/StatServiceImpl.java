@@ -4,14 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.dto.HitDto;
-import ru.practicum.dto.StatDto;
-import ru.practicum.model.Endpoint;
-import ru.practicum.model.EndpointMapper;
-import ru.practicum.model.Hit;
-import ru.practicum.model.HitMapper;
-import ru.practicum.repository.HitRepository;
-import ru.practicum.repository.StatRepository;
+import ru.practicum.dto.*;
+import ru.practicum.model.*;
+import ru.practicum.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;

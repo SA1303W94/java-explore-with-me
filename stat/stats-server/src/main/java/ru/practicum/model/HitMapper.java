@@ -1,10 +1,8 @@
 package ru.practicum.model;
 
 import lombok.experimental.UtilityClass;
-import org.springframework.stereotype.Component;
 import ru.practicum.dto.HitDto;
 
-@Component
 @UtilityClass
 public class HitMapper {
 
