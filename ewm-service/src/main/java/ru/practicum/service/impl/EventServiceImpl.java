@@ -336,7 +336,6 @@ public class EventServiceImpl implements EventService {
                 LocalDateTime.now().format(FormatConstants.FORMATTER),
                 Collections.singletonList(request.getRequestURI()),
                 true);
-        log.info("получен ответ от статистики" + Arrays.toString(response.getBody()));
         Optional<StatDto> statDto;
         Long hits = 0L;
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {

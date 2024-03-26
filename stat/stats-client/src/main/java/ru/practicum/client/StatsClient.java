@@ -36,7 +36,6 @@ public class StatsClient {
     public ResponseEntity<StatDto[]> getStats(String start, String end, List<String> uris, boolean unique) {
         Map<String, Object> parameters;
         String path = null;
-        log.info("! path = {}", path);
         if (!uris.isEmpty()) {
             parameters = Map.of(
                     "start", start,
@@ -45,8 +44,6 @@ public class StatsClient {
                     "unique", unique
             );
             path = serverUrl + "/stats/?start={start}&end={end}&uris={uris}&unique={unique}";
-            log.info("! parameters = {}", parameters);
-            log.info("! path = {}", path);
         } else {
             parameters = Map.of(
                     "start", start,
@@ -54,8 +51,6 @@ public class StatsClient {
                     "unique", unique
             );
             path = serverUrl + "/stats/?start={start}&end={end}&unique={unique}";
-            log.info("! parameters = {}", parameters);
-            log.info("! path = {}", path);
         }
         ResponseEntity<StatDto[]> serverResponse = restTemplate.getForEntity(path, StatDto[].class, parameters);
         if (serverResponse.getStatusCode().is2xxSuccessful()) {
