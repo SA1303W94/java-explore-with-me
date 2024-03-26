@@ -12,7 +12,6 @@ import ru.practicum.dto.HitDto;
 import ru.practicum.dto.StatDto;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -33,14 +32,14 @@ public class StatsClient {
         restTemplate.exchange(serverUrl + "/hit", HttpMethod.POST, requestEntity, Object.class);
     }
 
-    public ResponseEntity<StatDto[]> getStats(String start, String end, List<String> uris, boolean unique) {
+    public ResponseEntity<StatDto[]> getStats(String start, String end, String[] uris, Boolean unique) {
         Map<String, Object> parameters;
         String path = null;
-        if (!uris.isEmpty()) {
+        if (uris != null) {
             parameters = Map.of(
                     "start", start,
                     "end", end,
-                    "uris", String.join(",", uris),
+                    "uris", uris,
                     "unique", unique
             );
             path = serverUrl + "/stats/?start={start}&end={end}&uris={uris}&unique={unique}";

@@ -309,9 +309,11 @@ public class EventServiceImpl implements EventService {
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build());
+
         Long newCountHits = getCountHits(request);
+
         if (newCountHits != null && newCountHits > countHits) {
-            event.setViews(event.getViews() + 1L);
+            event.setViews(event.getViews() + 1);
             eventRepository.save(event);
         }
         return EventMapper.toEventFullDto(event);
@@ -334,7 +336,7 @@ public class EventServiceImpl implements EventService {
         ResponseEntity<StatDto[]> response = statsClient.getStats(
                 LocalDateTime.now().minusYears(100).format(FormatConstants.FORMATTER),
                 LocalDateTime.now().format(FormatConstants.FORMATTER),
-                Collections.singletonList(request.getRequestURI()),
+                new String[] {request.getRequestURI()},
                 true);
         Optional<StatDto> statDto;
         Long hits = 0L;
