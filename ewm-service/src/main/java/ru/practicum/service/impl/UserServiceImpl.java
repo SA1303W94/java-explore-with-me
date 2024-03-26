@@ -42,14 +42,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> getAll(List<Long> ids, Integer from, Integer size) {
-        log.info("Getting a list of users by IDs: ids = " + ids + ", from = " + from + ", size = " + size);
+        log.info("Getting a list of users by IDs: ids = {}, from = {}, size = {}", ids, from, size);
         return UserMapper.mapToDtos(userRepository.findByIdIn(ids, PageRequest.of(from / size, size)));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> getAll(Integer from, Integer size) {
-        log.info("Getting a list of all users: from = " + from + ", size = " + size);
+        log.info("Getting a list of all users: from = {}, size = {}", from, size);
         return UserMapper.mapToDtos(userRepository.findAll(PageRequest.of(from / size, size)).getContent());
     }
 }

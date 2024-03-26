@@ -12,7 +12,6 @@ public class UserMapper {
 
     public User mapToEntity(UserDto dto) {
         return User.builder()
-                // .id(dto.getId())
                 .name(dto.getName())
                 .email(dto.getEmail())
                 .build();

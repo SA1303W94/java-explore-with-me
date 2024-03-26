@@ -27,13 +27,11 @@ import static ru.practicum.exception.ExceptionType.CATEGORY_NOT_FOUND;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-
     private final EventRepository eventRepository;
 
     @Override
     public CategoryDto create(CategoryDto dto) {
         Category category = categoryRepository.save(CategoryMapper.mapToEntity(dto));
-
         log.info("new category {} has been created", category);
         return CategoryMapper.mapToDto(category);
     }
@@ -45,7 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
         String name = dto.getName();
 
         category.setName(name);
-        log.info("updating category by id = {}. name = {}", id, name);
+        log.info("updating category by id = {}, name = {}", id, name);
         return CategoryMapper.mapToDto(categoryRepository.save(category));
     }
 
@@ -78,7 +76,6 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto getById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(String.format(CATEGORY_NOT_FOUND.getValue(), id)));
-
         log.info("found category: {}", category);
         return CategoryMapper.mapToDto(category);
     }

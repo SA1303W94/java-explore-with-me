@@ -32,13 +32,9 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public List<CompilationDto> getAll(Boolean pinned, int from, int size) {
-        log.info("Getting collections of events by parameters: pinned = " + pinned + ", from = " + from + ", size = " + size);
+        log.info("Getting collections of events by parameters: pinned = {} from = {}, size = {}", pinned, from, size);
         List<Compilation> compilations;
-        // if (pinned != null) {
         compilations = compilationRepository.findByPinnedEquals(pinned, PageRequest.of(from / size, size));
-        //  } else {
-        // compilations = compilationRepository.findAll(PageRequest.of(from / size, size)).getContent();
-        //  }
         return !compilations.isEmpty() ? compilations.stream().map(CompilationMapper::toCompilationDto)
                 .collect(Collectors.toList()) : Collections.emptyList();
     }
@@ -52,7 +48,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto create(CompilationCreateDto newCompilationDto) {
-        log.info("Adding a new collection: compilation = " + newCompilationDto);
+        log.info("Adding a new collection: compilation = {}", newCompilationDto);
         Compilation compilation = CompilationMapper.mapToEntity(newCompilationDto);
         if (newCompilationDto.getEvents() != null) {
             compilation.setEvents(eventRepository.findByIdIn(newCompilationDto.getEvents()));
@@ -62,7 +58,8 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto update(Long id, CompilationUpdateDto updateCompilationRequestDto) {
-        log.info("Updating information about compilation: comp_id = " + id + ", update_compilation = " + updateCompilationRequestDto);
+        log.info("Updating information about compilation: comp_id = {} update_compilation = {}",
+                id, updateCompilationRequestDto);
         Compilation compilation = compilationRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(String.format(COMPILATION_NOT_FOUND.getValue(), id)));
         if (updateCompilationRequestDto.getTitle() != null) {
@@ -79,7 +76,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public void delete(Long id) {
-        log.info("Deleting compilation: comp_id = " + id);
+        log.info("Deleting compilation: comp_id = {}", id);
         compilationRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(String.format(COMPILATION_NOT_FOUND.getValue(), id)));
         compilationRepository.deleteById(id);

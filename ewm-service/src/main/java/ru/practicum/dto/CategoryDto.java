@@ -3,7 +3,6 @@ package ru.practicum.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -17,7 +16,6 @@ public class CategoryDto {
 
     @NotBlank
     @Size(max = 50)
-    @NotNull
     private String name;
 
 }

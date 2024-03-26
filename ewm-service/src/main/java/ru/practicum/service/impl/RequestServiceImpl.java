@@ -38,26 +38,23 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public RequestDto create(Long userId, Long eventId) {
-        log.info("Adding a request from the current user to participate in the event: user_id = " + userId + ", event_id = " + eventId);
+        log.info("Adding a request from the current user to participate in the event: " +
+                "user_id = {}, event_id = {}", userId, eventId);
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException(String.format(EVENT_NOT_FOUND.getValue(), eventId)));
         Request existParticipationRequest = requestRepository.findByRequesterIdAndEventId(userId, eventId);
         if (existParticipationRequest != null) {
-            log.info("Error: User with ID = " + userId + " can't add a repeat request with ID = " + eventId);
             throw new ValidationConflictException(String.format(REQUEST_DUPLICATE.getValue(), userId, eventId));
         }
         if (event.getInitiator().getId().equals(userId)) {
-            log.info("Error: initiator with ID = " + userId + " can't add a request to participate in his event with ID = " + eventId);
             throw new ValidationConflictException(String.format(EVENT_INITIATED_BY_REQUESTER.getValue()));
         }
         if (event.getPublicationState() != PublicationState.PUBLISHED) {
-            log.info("Error: User with ID = " + userId + " cannot participate in an unpublished event with an ID = " + eventId);
             throw new ValidationConflictException(String.format(REQUEST_FOR_UNPUBLISHED_EVENT.getValue()));
         }
         if (event.getParticipantLimit() != 0 && requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED) >= event.getParticipantLimit()) {
-            log.info("Error: User with ID = " + userId + " cannot participate in an event with an ID = " + eventId + ", since the limit of participation requests has been reached");
             throw new ValidationConflictException(String.format(REACHED_PARTICIPANT_LIMIT.getValue()));
         }
         RequestStatus status = RequestStatus.PENDING;
@@ -75,7 +72,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public RequestDto cancelRequest(Long userId, Long requestId) {
-        log.info("Cancellation of your request to participate in the event: user_id = " + userId + ", request_id = " + requestId);
+        log.info("Cancellation of your request to participate in the event: user_id = {}, request_id = {}",
+                userId, requestId);
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         Request requestToUpdate = requestRepository.getReferenceById(requestId);
         requestToUpdate.setStatus(RequestStatus.CANCELED);
@@ -84,7 +82,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDto> getAll(Long userId) {
-        log.info("Getting information about the current user's requests to participate in other people's events: user_id = " + userId);
+        log.info("Getting information about the current user's requests to participate in other people's events: " +
+                "user_id = {}", userId);
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         List<Optional<Request>> requests = requestRepository.findByRequesterId(userId);
         return requests.stream()
@@ -96,8 +95,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDto> getRequestsForUserEvent(Long userId, Long eventId) {
-        log.info("Getting information about requests to participate in the event of the current user: user_id = " + userId +
-                ", event_id = " + eventId);
+        log.info("Getting information about requests to participate in the event of the current user: " +
+                "user_id = {}, event_id = {}",  userId, eventId);
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         List<Event> userEvents = eventRepository.findByIdAndInitiatorId(eventId, userId);
         List<Optional<Request>> requests = requestRepository.findByEventIn(userEvents);
@@ -112,8 +111,9 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public RequestStatusDto changeRequestsStatus(Long userId, Long eventId,
                                                  RequestStatusUpdateDto eventRequestStatusUpdateRequest) {
-        log.info("Changing the status (confirmed, canceled) of applications for participation in the event of the current user: " +
-                "user_id = " + userId + ", event_id = " + eventId + ", новый статус = " + eventRequestStatusUpdateRequest);
+        log.info("Changing the status (confirmed, canceled) of applications for participation " +
+                "in the event of the current user: {}, event_id = {}, status = {}",
+                userId, eventId, eventRequestStatusUpdateRequest.getStatus());
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         Event event = eventRepository.findById(eventId).orElseThrow(() ->

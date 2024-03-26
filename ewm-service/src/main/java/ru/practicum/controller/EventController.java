@@ -1,6 +1,7 @@
 package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,33 +17,38 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class EventController {
     private final EventService eventService;
 
     @PostMapping("/users/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto create(@Valid @PathVariable("userId") @Positive Long userId,
+    public EventFullDto create(@PathVariable("userId") @Positive Long userId,
                                @Valid @RequestBody EventCreateDto eventDto) {
+        log.info("POST event = {} with userId = {}", eventDto, userId);
         return eventService.createEvent(userId, eventDto);
     }
 
     @GetMapping("/users/{userId}/events")
-    public List<EventShortDto> getByUserId(@PathVariable("userId") @Valid @Positive Long userId,
+    public List<EventShortDto> getByUserId(@PathVariable("userId") @Positive Long userId,
                                            @PositiveOrZero @RequestParam(defaultValue = "0") int from,
                                            @Positive @RequestParam(defaultValue = "10") int size) {
+        log.info("GET events with userId = {}, from = {}, size = {}", userId, from, size);
         return eventService.getEvents(userId, from, size);
     }
 
     @GetMapping("/users/{userId}/events/{eventId}")
-    public EventFullDto getById(@PathVariable("userId") @Valid @Positive Long userId,
-                                @PathVariable("eventId") @Valid @Positive Long eventId) {
+    public EventFullDto getById(@PathVariable("userId")@Positive Long userId,
+                                @PathVariable("eventId") @Positive Long eventId) {
+        log.info("GET event with userId = {}, eventId = {}", userId, eventId);
         return eventService.getEventById(userId, eventId);
     }
 
     @PatchMapping("/users/{userId}/events/{eventId}")
-    public EventFullDto updateEventByUser(@PathVariable("userId") @Valid @Positive Long userId,
-                                          @PathVariable("eventId") @Valid @Positive Long eventId,
+    public EventFullDto updateEventByUser(@PathVariable("userId") @Positive Long userId,
+                                          @PathVariable("eventId") @Positive Long eventId,
                                           @RequestBody @Validated EventUpdateUserDto updateEventUserRequestDto) {
+        log.info("PATCH event with userId = {}, eventId = {}, updateEventUserRequestDto = {}", userId, eventId, updateEventUserRequestDto);
         return eventService.updateEventByUser(userId, eventId, updateEventUserRequestDto);
     }
 
@@ -54,12 +60,15 @@ public class EventController {
                                                @RequestParam(required = false) String rangeEnd,
                                                @RequestParam(defaultValue = "0") int from,
                                                @RequestParam(defaultValue = "10") int size) {
+        log.info("GET all events from = {}, size = {}, users = {}, states = {}, categories = {}, " +
+                "rangeStart = {}, rangeEnd = {}", from, size, users, states, categories, rangeStart, rangeEnd);
         return eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
     @PatchMapping("/admin/events/{eventId}")
-    public EventFullDto updateEventByAdmin(@PathVariable("eventId") @Valid @Positive Long eventId,
+    public EventFullDto updateEventByAdmin(@PathVariable("eventId") @Positive Long eventId,
                                            @RequestBody @Valid EventUpdateAdminDto updateEventAdminRequestDto) {
+        log.info("PATCH event with eventId = {}, updateEventAdminRequestDto = {}", eventId, updateEventAdminRequestDto);
         return eventService.updateEventByAdmin(eventId, updateEventAdminRequestDto);
     }
 
@@ -74,14 +83,17 @@ public class EventController {
                                                   @RequestParam(defaultValue = "0") int from,
                                                   @RequestParam(defaultValue = "10") int size,
                                                   HttpServletRequest request) {
-        return eventService.getPublishedEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
+        log.info("GET all published events from = {}, size = {}, text = {}, categories = {}, paid = {}, " +
+                "rangeStart = {}, rangeEnd = {}, onlyAvailable = {}, sort = {}, request = {}",
+                from, size, text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, request);
+    return eventService.getPublishedEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 sort, from, size, request);
     }
 
     @GetMapping("/events/{eventId}")
     public EventFullDto getPublishedEventById(@PathVariable("eventId") @Positive Long eventId,
-                                              //стоял @Valid все ломалось, почему?
                                               HttpServletRequest request) {
+        log.info("GET event with eventId = {}, request = {}", eventId, request);
         return eventService.getPublishedEventById(eventId, request);
     }
 }

@@ -1,6 +1,7 @@
 package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
+@Slf4j
 public class CompilationController {
 
     private final CompilationService compilationService;
@@ -23,31 +25,36 @@ public class CompilationController {
     @PostMapping("/admin/compilations")
     @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto create(@Valid @RequestBody CompilationCreateDto dto) {
+        log.info("POST compilation = {}", dto);
         return compilationService.create(dto);
     }
 
     @PatchMapping("/admin/compilations/{compId}")
     public CompilationDto update(@PathVariable("compId") Long id, @Valid @RequestBody CompilationUpdateDto dto) {
+        log.info("UPDATE compilation = {} with id = {}", dto, id);
         return compilationService.update(id, dto);
     }
 
     @DeleteMapping(value = "/admin/compilations/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("compId") Long id) {
+        log.info("DELETE compilation with id = {}", id);
         compilationService.delete(id);
     }
 
     @GetMapping("/compilations")
-    public List<CompilationDto> getAll(@RequestParam(required = false, defaultValue = "false") Boolean pinned,
-                                       @Valid @PositiveOrZero @RequestParam(required = false, defaultValue = "0")
+    public List<CompilationDto> getAll(@RequestParam(defaultValue = "false") Boolean pinned,
+                                       @PositiveOrZero @RequestParam(defaultValue = "0")
                                        Integer from,
-                                       @Valid @PositiveOrZero @RequestParam(required = false, defaultValue = "10")
+                                       @PositiveOrZero @RequestParam(defaultValue = "10")
                                        Integer size) {
+        log.info("GET all compilations pinned = {}, from = {}, size = {}", pinned, from, size);
         return compilationService.getAll(pinned, from, size);
     }
 
     @GetMapping("/compilations/{compId}")
     public CompilationDto getById(@PathVariable("compId") Long id) {
+        log.info("GET compilation with id = {}", id);
         return compilationService.getById(id);
     }
 }

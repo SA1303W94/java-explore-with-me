@@ -53,7 +53,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto createEvent(Long userId, EventCreateDto newEventDto) {
-        log.info("Adding a new event: user_id = " + userId + ", event = " + newEventDto);
+        log.info("Create a new event: user_id = {}, event = {}", userId, newEventDto);
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         Category category = categoryRepository.findById(newEventDto.getCategory()).orElseThrow(() ->
@@ -74,8 +74,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
-        log.info("Getting events added by the current user: user_id = " + userId + ", from = " + from +
-                ", size = " + size);
+        log.info("Getting events added by the current user: user_id = {} from = {} size = {}", userId, from, size);
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         List<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from / size, size));
@@ -87,8 +86,8 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public EventFullDto getEventById(Long userId, Long eventId) {
-        log.info("Getting full information about the event added by the current user: user_id = " + userId +
-                ", event_id = " + eventId);
+        log.info("Getting full information about the event added by the current user: user_id = {}, event_id = {}",
+                userId, eventId);
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         return EventMapper.toEventFullDto(eventRepository.findById(eventId)
@@ -97,8 +96,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto updateEventByUser(Long userId, Long eventId, EventUpdateUserDto updateEventUserRequestDto) {
-        log.info("Updating event information: user_id = " + userId + ", event_id = " + eventId +
-                ", update_event = " + updateEventUserRequestDto);
+            log.info("Updating event information: user_id = {}, event_id = {}, updateEventUserRequestDto = {}",
+                    userId, eventId, updateEventUserRequestDto);
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
@@ -162,9 +161,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto updateEventByAdmin(Long eventId, EventUpdateAdminDto updateEventAdminRequestDto) {
-        log.info("updating information about the event by the administrator: event_id = " + eventId + ", update_event = " + updateEventAdminRequestDto);
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException(String.format(EVENT_NOT_FOUND.getValue(), eventId)));
-
+        log.info("updating information about the event by the administrator: event_id = {}, " +
+                        "updateEventAdminRequestDto = {}", eventId, updateEventAdminRequestDto);
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException(String.format(EVENT_NOT_FOUND.getValue(), eventId)));
         if (updateEventAdminRequestDto.getStateAction() != null) {
             if (updateEventAdminRequestDto.getStateAction() == PUBLISH_EVENT) {
                 if (event.getPublicationState() != PENDING) {
@@ -231,8 +231,8 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
                                                String rangeStart, String rangeEnd, int from, int size) {
-        log.info("Search for events by parameters: user_ids = " + users + ", states = " + states + ", categories = " + categories +
-                ", rangeStart = " + rangeStart + ", rangeEnd = " + rangeEnd);
+        log.info("Search for events by parameters: user_ids = {}, states = {}, categories = {}, rangeStart = {}, " +
+                "rangeEnd = {}, from = {}, size = {}", users, states, categories, rangeStart, rangeEnd, from, size);
         validateEventStates(states);
         List<Event> events = eventRepository.findEvents(users,
                 states, categories,
@@ -251,10 +251,9 @@ public class EventServiceImpl implements EventService {
                                                   String rangeEnd, boolean onlyAvailable,
                                                   String sort, int from, int size,
                                                   HttpServletRequest request) {
-        log.info("Search for published events by parameters: text = " + text + ", categories = " + categories +
-                ", paid = " + paid + ", rangeStart = " + rangeStart + ", rangeEnd = " + rangeEnd +
-                ", onlyAvailable = " + onlyAvailable + ", sort = " + sort + ", from = " + from +
-                ", size = " + size);
+        log.info("Search for published events by parameters: text = {}, categories = {}, paid = {}, rangeStart = {}, " +
+                "rangeEnd = {}, onlyAvailable = {}, sort = {}, from = {}, size = {}",
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
         statsClient.create(HitDto.builder()
                 .app("ewm-service")
                 .uri(request.getRequestURI())
@@ -299,7 +298,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getPublishedEventById(Long eventId, HttpServletRequest request) {
-        log.info("Getting information about a published event by ID: event_id = " + eventId);
+        log.info("Getting information about a published event by ID: event_id = {}", eventId);
         Event event = eventRepository.findByIdAndPublicationState(eventId, PUBLISHED)
                 .orElseThrow(() -> new NotFoundException(String.format(EVENT_NOT_FOUND.getValue(), eventId)));
         Long countHits = getCountHits(request);

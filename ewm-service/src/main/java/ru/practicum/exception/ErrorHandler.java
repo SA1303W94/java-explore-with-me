@@ -48,9 +48,9 @@ public class ErrorHandler {
         return new ErrorInfo(NOT_FOUND.name(), NOT_FOUND.getReasonPhrase(), e.getMessage(), LocalDateTime.now());
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorInfo processException(Exception e) {
+    public ErrorInfo processException(Throwable e) {
         log.error("Unexpected error: ", e);
         return new ErrorInfo(INTERNAL_SERVER_ERROR.name(), INTERNAL_SERVER_ERROR.getReasonPhrase(), e.getMessage(),
                 LocalDateTime.now());
