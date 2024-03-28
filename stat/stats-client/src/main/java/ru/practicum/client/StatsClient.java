@@ -1,22 +1,65 @@
 package ru.practicum.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.client.RestTemplate;
+import ru.practicum.dto.HitDto;
+import ru.practicum.dto.StatDto;
+
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @Service
-public class StatsClient extends BaseClient {
+@Slf4j
+public class StatsClient {
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final RestTemplate restTemplate;
+    private final String serverUrl;
 
-    @Autowired
-    public StatsClient(@Value("${stats.server.url}") String statsUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(statsUrl))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build()
-        );
+
+    public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder restTemplateBuilder) {
+        this.serverUrl = serverUrl;
+        this.restTemplate = restTemplateBuilder.build();
+    }
+
+    public void create(HitDto hitDto) {
+        HttpEntity<HitDto> requestEntity = new HttpEntity<>(hitDto);
+        restTemplate.exchange(serverUrl + "/hit", HttpMethod.POST, requestEntity, Object.class);
+    }
+
+    public ResponseEntity<StatDto[]> getStats(String start, String end, String[] uris, Boolean unique) {
+        Map<String, Object> parameters;
+        String path = null;
+        if (uris != null) {
+            parameters = Map.of(
+                    "start", start,
+                    "end", end,
+                    "uris", uris,
+                    "unique", unique
+            );
+            path = serverUrl + "/stats/?start={start}&end={end}&uris={uris}&unique={unique}";
+        } else {
+            parameters = Map.of(
+                    "start", start,
+                    "end", end,
+                    "unique", unique
+            );
+            path = serverUrl + "/stats/?start={start}&end={end}&unique={unique}";
+        }
+        ResponseEntity<StatDto[]> serverResponse = restTemplate.getForEntity(path, StatDto[].class, parameters);
+        if (serverResponse.getStatusCode().is2xxSuccessful()) {
+            log.info("! serverResponse = {}", (Object) serverResponse.getBody());
+            return serverResponse;
+        }
+        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(serverResponse.getStatusCode());
+        if (serverResponse.hasBody()) {
+            return responseBuilder.body(serverResponse.getBody());
+        }
+        return responseBuilder.build();
     }
 }

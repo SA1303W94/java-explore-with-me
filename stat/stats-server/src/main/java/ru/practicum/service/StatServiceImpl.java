@@ -4,14 +4,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.dto.*;
-import ru.practicum.model.*;
-import ru.practicum.repository.*;
+import ru.practicum.dto.HitDto;
+import ru.practicum.dto.StatDto;
+import ru.practicum.model.Endpoint;
+import ru.practicum.model.EndpointMapper;
+import ru.practicum.model.Hit;
+import ru.practicum.model.HitMapper;
+import ru.practicum.repository.HitRepository;
+import ru.practicum.repository.StatRepository;
 
+import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ru.practicum.exception.ExceptionType.START_DATE_IN_PAST;
 
 @Service
 @Slf4j
@@ -41,6 +49,9 @@ public class StatServiceImpl implements StatService {
     @Transactional(readOnly = true)
     public List<StatDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         log.info("getting stats by start = {}, end = {}, URIs = {}, unique = {}", start, end, uris, unique);
+        if (start.isAfter(end)) {
+            throw new ValidationException((String.format(START_DATE_IN_PAST.getValue(), start)));
+        }
         List<Endpoint> endpoints = statRepository.findBySentDttmRange(start, end);
 
         if (uris != null && !uris.isEmpty()) {
