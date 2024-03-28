@@ -17,5 +17,4 @@ public class CategoryDto {
     @NotBlank
     @Size(max = 50)
     private String name;
-
 }

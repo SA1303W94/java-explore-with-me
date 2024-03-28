@@ -57,6 +57,10 @@ public class RequestServiceImpl implements RequestService {
         if (event.getParticipantLimit() != 0 && requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED) >= event.getParticipantLimit()) {
             throw new ValidationConflictException(String.format(REACHED_PARTICIPANT_LIMIT.getValue()));
         }
+//        if (event.getRequestModeration()) {
+//            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+//            eventRepository.save(event);
+//        }
         RequestStatus status = RequestStatus.PENDING;
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             status = RequestStatus.CONFIRMED;
@@ -96,7 +100,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<RequestDto> getRequestsForUserEvent(Long userId, Long eventId) {
         log.info("Getting information about requests to participate in the event of the current user: " +
-                "user_id = {}, event_id = {}",  userId, eventId);
+                "user_id = {}, event_id = {}", userId, eventId);
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         List<Event> userEvents = eventRepository.findByIdAndInitiatorId(eventId, userId);
         List<Optional<Request>> requests = requestRepository.findByEventIn(userEvents);
@@ -112,7 +116,7 @@ public class RequestServiceImpl implements RequestService {
     public RequestStatusDto changeRequestsStatus(Long userId, Long eventId,
                                                  RequestStatusUpdateDto eventRequestStatusUpdateRequest) {
         log.info("Changing the status (confirmed, canceled) of applications for participation " +
-                "in the event of the current user: {}, event_id = {}, status = {}",
+                        "in the event of the current user: {}, event_id = {}, status = {}",
                 userId, eventId, eventRequestStatusUpdateRequest.getStatus());
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));

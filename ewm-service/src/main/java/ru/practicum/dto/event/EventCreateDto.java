@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import lombok.*;
+import ru.practicum.constant.FormatConstants;
 import ru.practicum.dto.LocationDto;
 import ru.practicum.dto.type.EventAction;
 
@@ -18,12 +19,10 @@ import java.time.LocalDateTime;
 @Setter
 public class EventCreateDto {
 
-    @NotNull
     @NotBlank
     @Size(min = 3, max = 120)
     private String title;
 
-    @NotNull
     @NotBlank
     @Size(min = 20, max = 2000)
     private String annotation;
@@ -31,12 +30,11 @@ public class EventCreateDto {
     @PositiveOrZero
     private long category;
 
-    @NotNull
     @NotBlank
     @Size(min = 20, max = 7000)
     private String description;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = FormatConstants.FORMAT_DATE_TIME)
     @NotNull
     @FutureOrPresent
     private LocalDateTime eventDate;

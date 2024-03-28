@@ -3,7 +3,6 @@ package ru.practicum.mapper;
 import lombok.experimental.UtilityClass;
 import ru.practicum.dto.CompilationCreateDto;
 import ru.practicum.dto.CompilationDto;
-import ru.practicum.dto.CompilationUpdateDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.model.Compilation;
 
@@ -39,14 +38,6 @@ public class CompilationMapper {
                 .title(compilation.getTitle())
                 .pinned(compilation.getPinned())
                 .events(events)
-                .build();
-    }
-
-    public Compilation mapToEntityForUpdate(Compilation existing, CompilationUpdateDto dto, Long id) {
-        return Compilation.builder()
-                .id(id)
-                .title(dto.getTitle() != null ? dto.getTitle() : existing.getTitle())
-                .pinned(dto.getPinned() != null ? dto.getPinned() : existing.getPinned())
                 .build();
     }
 }

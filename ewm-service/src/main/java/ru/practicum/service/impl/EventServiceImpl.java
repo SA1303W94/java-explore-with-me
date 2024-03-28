@@ -2,7 +2,6 @@ package ru.practicum.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,18 +13,15 @@ import ru.practicum.dto.event.*;
 import ru.practicum.dto.type.EventAction;
 import ru.practicum.dto.type.EventSort;
 import ru.practicum.dto.type.PublicationState;
+import ru.practicum.dto.type.RequestStatus;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationConflictException;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.LocationMapper;
-import ru.practicum.model.Category;
-import ru.practicum.model.Event;
-import ru.practicum.model.Location;
-import ru.practicum.model.User;
-import ru.practicum.repository.CategoryRepository;
-import ru.practicum.repository.EventRepository;
-import ru.practicum.repository.LocationRepository;
-import ru.practicum.repository.UserRepository;
+import ru.practicum.mapper.RequestMapper;
+import ru.practicum.model.*;
+import ru.practicum.page.CustomPageRequest;
+import ru.practicum.repository.*;
 import ru.practicum.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static ru.practicum.dto.type.EventAction.PUBLISH_EVENT;
 import static ru.practicum.dto.type.EventAction.REJECT_EVENT;
 import static ru.practicum.dto.type.PublicationState.PENDING;
@@ -46,6 +43,7 @@ import static ru.practicum.exception.ExceptionType.*;
 @Transactional
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
+    private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
@@ -68,7 +66,8 @@ public class EventServiceImpl implements EventService {
         event.setPublicationState(PENDING);
         event.setLocation(locationRepository.save(LocationMapper.mapToEntity(newEventDto.getLocation())));
         event.setViews(0L);
-        return EventMapper.toEventFullDto(eventRepository.save(event));
+        event = eventRepository.save(event);
+        return EventMapper.toEventFullDto(event);
     }
 
     @Override
@@ -77,7 +76,7 @@ public class EventServiceImpl implements EventService {
         log.info("Getting events added by the current user: user_id = {} from = {} size = {}", userId, from, size);
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
-        List<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from / size, size));
+        List<Event> events = eventRepository.findByInitiatorId(userId, CustomPageRequest.of(from, size));
         return events.stream()
                 .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toList());
@@ -96,8 +95,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto updateEventByUser(Long userId, Long eventId, EventUpdateUserDto updateEventUserRequestDto) {
-            log.info("Updating event information: user_id = {}, event_id = {}, updateEventUserRequestDto = {}",
-                    userId, eventId, updateEventUserRequestDto);
+        log.info("Updating event information: user_id = {}, event_id = {}, updateEventUserRequestDto = {}",
+                userId, eventId, updateEventUserRequestDto);
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
@@ -144,9 +143,6 @@ public class EventServiceImpl implements EventService {
         if (updateEventUserRequestDto.getRequestModeration() != null) {
             event.setRequestModeration(updateEventUserRequestDto.getRequestModeration());
         }
-        if (updateEventUserRequestDto.getParticipantLimit() != null) {
-            event.setParticipantLimit(updateEventUserRequestDto.getParticipantLimit());
-        }
         if (updateEventUserRequestDto.getStateAction() == null) {
             return EventMapper.toEventFullDto(eventRepository.save(event));
         }
@@ -162,7 +158,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateEventByAdmin(Long eventId, EventUpdateAdminDto updateEventAdminRequestDto) {
         log.info("updating information about the event by the administrator: event_id = {}, " +
-                        "updateEventAdminRequestDto = {}", eventId, updateEventAdminRequestDto);
+                "updateEventAdminRequestDto = {}", eventId, updateEventAdminRequestDto);
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException(String.format(EVENT_NOT_FOUND.getValue(), eventId)));
         if (updateEventAdminRequestDto.getStateAction() != null) {
@@ -224,35 +220,50 @@ public class EventServiceImpl implements EventService {
         if (updateEventAdminRequestDto.getParticipantLimit() != null) {
             event.setParticipantLimit(updateEventAdminRequestDto.getParticipantLimit());
         }
+        event.setConfirmedRequests(RequestMapper.mapToDtos(requestRepository
+                .findByEventIdAndStatus(eventId, RequestStatus.CONFIRMED)));
+
         return EventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
-                                               String rangeStart, String rangeEnd, int from, int size) {
+                                               LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         log.info("Search for events by parameters: user_ids = {}, states = {}, categories = {}, rangeStart = {}, " +
                 "rangeEnd = {}, from = {}, size = {}", users, states, categories, rangeStart, rangeEnd, from, size);
         validateEventStates(states);
+
         List<Event> events = eventRepository.findEvents(users,
                 states, categories,
-                rangeStart != null ? LocalDateTime.parse(rangeStart, FormatConstants.FORMATTER) : null,
-                rangeEnd != null ? LocalDateTime.parse(rangeEnd, FormatConstants.FORMATTER) : null,
-                PageRequest.of(from / size, size));
-        return events
+                rangeStart,
+                rangeEnd,
+                CustomPageRequest.of(from, size));
+
+        return updateRequests(events);
+    }
+
+    private List<EventFullDto> updateRequests(List<Event> events) {
+        Map<Event, List<Request>> requests = requestRepository.findByEventInAndStatus(events, RequestStatus.CONFIRMED)
                 .stream()
-                .map(EventMapper::toEventFullDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.groupingBy(Request::getEvent, Collectors.toList()));
+        for (Event event : events) {
+            List<Request> itemComments = requests.get(event);
+            if (itemComments != null) {
+                event.setConfirmedRequests(RequestMapper.mapToDtos(itemComments));
+            }
+        }
+        return events.stream().map(EventMapper::toEventFullDto).collect(toList());
     }
 
     @Override
     public List<EventShortDto> getPublishedEvents(String text, List<Long> categories,
-                                                  Boolean paid, String rangeStart,
-                                                  String rangeEnd, boolean onlyAvailable,
+                                                  Boolean paid, LocalDateTime rangeStart,
+                                                  LocalDateTime rangeEnd, boolean onlyAvailable,
                                                   String sort, int from, int size,
                                                   HttpServletRequest request) {
         log.info("Search for published events by parameters: text = {}, categories = {}, paid = {}, rangeStart = {}, " +
-                "rangeEnd = {}, onlyAvailable = {}, sort = {}, from = {}, size = {}",
+                        "rangeEnd = {}, onlyAvailable = {}, sort = {}, from = {}, size = {}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
         statsClient.create(HitDto.builder()
                 .app("ewm-service")
@@ -260,24 +271,22 @@ public class EventServiceImpl implements EventService {
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
                 .build());
-        if (rangeStart != null && rangeEnd != null &&
-                LocalDateTime.parse(rangeStart, FormatConstants.FORMATTER)
-                        .isAfter(LocalDateTime.parse(rangeEnd, FormatConstants.FORMATTER))) {
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             throw new ValidationException(String.format(START_DATE_IN_PAST.getValue(), rangeStart));
         }
         List<Event> events = eventRepository.findPublishedEvents(
                 text,
                 categories,
                 paid,
-                rangeStart != null ? LocalDateTime.parse(rangeStart, FormatConstants.FORMATTER) : LocalDateTime.now(),
-                rangeEnd != null ? LocalDateTime.parse(rangeEnd, FormatConstants.FORMATTER) : null,
-                PageRequest.of(from / size, size));
+                rangeStart != null ? rangeStart : LocalDateTime.now(),
+                rangeEnd,
+                CustomPageRequest.of(from, size));
         List<EventShortDto> eventShortDtos = Collections.emptyList();
         if (events != null) {
             eventShortDtos = events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
             if (onlyAvailable) {
                 eventShortDtos = events.stream().filter(event ->
-                        EventMapper.countConfirmedRequests(event.getRequests()) < event.getParticipantLimit()
+                        requestRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED) < event.getParticipantLimit()
                 ).map(EventMapper::toEventShortDto).collect(Collectors.toList());
             }
             if (sort != null) {
@@ -335,7 +344,7 @@ public class EventServiceImpl implements EventService {
         ResponseEntity<StatDto[]> response = statsClient.getStats(
                 LocalDateTime.now().minusYears(100).format(FormatConstants.FORMATTER),
                 LocalDateTime.now().format(FormatConstants.FORMATTER),
-                new String[] {request.getRequestURI()},
+                new String[]{request.getRequestURI()},
                 true);
         Optional<StatDto> statDto;
         Long hits = 0L;

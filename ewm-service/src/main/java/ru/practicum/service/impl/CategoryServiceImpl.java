@@ -2,7 +2,6 @@ package ru.practicum.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +9,7 @@ import ru.practicum.dto.CategoryDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CategoryMapper;
 import ru.practicum.model.Category;
+import ru.practicum.page.CustomPageRequest;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.service.CategoryService;
@@ -63,10 +63,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public List<CategoryDto> getAll(Integer from, Integer size) {
-        int page = from != 0 ? from / size : from;
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = CustomPageRequest.of(from, size);
         List<Category> categories = categoryRepository.findAll(pageable).getContent();
-
         log.info("found {} categories", categories.size());
         return CategoryMapper.mapToDtos(categories);
     }

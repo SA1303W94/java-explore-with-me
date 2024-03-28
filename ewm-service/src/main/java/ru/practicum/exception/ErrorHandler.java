@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.constant.FormatConstants;
 
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.NoSuchElementException;
 
@@ -30,7 +30,7 @@ public class ErrorHandler {
             HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class, IllegalStateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorInfo handleBadRequestException(Exception e) {
+    public ErrorInfo handleBadRequestException(RuntimeException e) {
         return new ErrorInfo(BAD_REQUEST.name(), BAD_REQUEST.getReasonPhrase(), e.getMessage(), LocalDateTime.now());
     }
 
@@ -38,13 +38,13 @@ public class ErrorHandler {
             ConstraintViolationException.class, DateTimeParseException.class,
             DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorInfo handleConflictException(Exception e) {
+    public ErrorInfo handleConflictException(RuntimeException e) {
         return new ErrorInfo(CONFLICT.name(), CONFLICT.getReasonPhrase(), e.getMessage(), LocalDateTime.now());
     }
 
     @ExceptionHandler({NotFoundException.class, NoSuchElementException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorInfo handleNoSuchElementException(Exception e) {
+    public ErrorInfo handleNoSuchElementException(RuntimeException e) {
         return new ErrorInfo(NOT_FOUND.name(), NOT_FOUND.getReasonPhrase(), e.getMessage(), LocalDateTime.now());
     }
 
@@ -66,12 +66,10 @@ public class ErrorHandler {
         private String timestamp;
 
         public ErrorInfo(String status, String reason, String message, LocalDateTime timestamp) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
             this.status = status;
             this.reason = reason;
             this.message = message;
-            this.timestamp = formatter.format(timestamp);
+            this.timestamp = FormatConstants.FORMATTER.format(timestamp);
         }
     }
 }

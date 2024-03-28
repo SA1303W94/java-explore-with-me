@@ -1,6 +1,7 @@
 package ru.practicum.model;
 
 import lombok.*;
+import ru.practicum.dto.RequestDto;
 import ru.practicum.dto.type.PublicationState;
 
 import javax.persistence.*;
@@ -68,9 +69,9 @@ public class Event {
     @Column(name = "create_dttm")
     private LocalDateTime createDate;
 
-    @OneToMany(mappedBy = "event")
-    private List<Request> requests;
-
     @Column(name = "views")
     private Long views;
+
+    @Transient
+    private List<RequestDto> confirmedRequests;
 }

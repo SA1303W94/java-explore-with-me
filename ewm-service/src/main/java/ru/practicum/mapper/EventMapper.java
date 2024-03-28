@@ -1,12 +1,12 @@
 package ru.practicum.mapper;
 
 import lombok.experimental.UtilityClass;
+import ru.practicum.dto.RequestDto;
 import ru.practicum.dto.event.EventCreateDto;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.type.RequestStatus;
 import ru.practicum.model.Event;
-import ru.practicum.model.Request;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class EventMapper {
                 .eventDate(event.getEventDate())
                 .initiator(UserMapper.mapToUserShortDto(event.getInitiator()))
                 .views(event.getViews())
-                .confirmedRequests(countConfirmedRequests(event.getRequests()))
+                .confirmedRequests(countConfirmedRequests(event.getConfirmedRequests()))
                 .description(event.getDescription())
                 .participantLimit(event.getParticipantLimit())
                 .state(event.getPublicationState())
@@ -53,14 +53,14 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.mapToDto(event.getCategory()))
                 .eventDate(event.getEventDate())
-                .confirmedRequests(countConfirmedRequests(event.getRequests()))
+                .confirmedRequests(countConfirmedRequests(event.getConfirmedRequests()))
                 .initiator(UserMapper.mapToUserShortDto(event.getInitiator()))
                 .paid(event.getPaid())
                 .views(event.getViews())
                 .build();
     }
 
-    public long countConfirmedRequests(List<Request> requests) {
+    public long countConfirmedRequests(List<RequestDto> requests) {
         return requests != null
                 ? requests.stream().filter(r -> r.getStatus() == RequestStatus.CONFIRMED).count()
                 : 0;

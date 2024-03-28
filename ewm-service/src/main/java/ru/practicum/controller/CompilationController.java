@@ -24,13 +24,13 @@ public class CompilationController {
 
     @PostMapping("/admin/compilations")
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto create(@Valid @RequestBody CompilationCreateDto dto) {
+    public CompilationDto create(@RequestBody @Valid CompilationCreateDto dto) {
         log.info("POST compilation = {}", dto);
         return compilationService.create(dto);
     }
 
     @PatchMapping("/admin/compilations/{compId}")
-    public CompilationDto update(@PathVariable("compId") Long id, @Valid @RequestBody CompilationUpdateDto dto) {
+    public CompilationDto update(@PathVariable("compId") Long id, @RequestBody @Valid CompilationUpdateDto dto) {
         log.info("UPDATE compilation = {} with id = {}", dto, id);
         return compilationService.update(id, dto);
     }
@@ -44,9 +44,9 @@ public class CompilationController {
 
     @GetMapping("/compilations")
     public List<CompilationDto> getAll(@RequestParam(defaultValue = "false") Boolean pinned,
-                                       @PositiveOrZero @RequestParam(defaultValue = "0")
+                                       @RequestParam(defaultValue = "0") @PositiveOrZero
                                        Integer from,
-                                       @PositiveOrZero @RequestParam(defaultValue = "10")
+                                       @RequestParam(defaultValue = "10") @PositiveOrZero
                                        Integer size) {
         log.info("GET all compilations pinned = {}, from = {}, size = {}", pinned, from, size);
         return compilationService.getAll(pinned, from, size);
