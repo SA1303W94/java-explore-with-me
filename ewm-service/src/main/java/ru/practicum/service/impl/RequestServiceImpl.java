@@ -57,6 +57,10 @@ public class RequestServiceImpl implements RequestService {
         if (event.getParticipantLimit() != 0 && requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED) >= event.getParticipantLimit()) {
             throw new ValidationConflictException(String.format(REACHED_PARTICIPANT_LIMIT.getValue()));
         }
+        if (!event.getRequestModeration()) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+            eventRepository.save(event);
+        }
         RequestStatus status = RequestStatus.PENDING;
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             status = RequestStatus.CONFIRMED;

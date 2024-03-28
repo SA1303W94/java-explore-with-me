@@ -61,7 +61,8 @@ CREATE TABLE IF NOT EXISTS events
     publication_state VARCHAR(10)  NOT NULL,
     publication_dttm  TIMESTAMP,
     create_dttm       TIMESTAMP     NOT NULL,
-    views             BIGINT        DEFAULT 0
+    views             BIGINT        DEFAULT 0,
+    confirmedRequests BIGINT        DEFAULT 0
 );
 
 COMMENT ON TABLE events IS 'События';

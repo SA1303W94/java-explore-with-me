@@ -277,7 +277,7 @@ public class EventServiceImpl implements EventService {
             eventShortDtos = events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
             if (onlyAvailable) {
                 eventShortDtos = events.stream().filter(event ->
-                        EventMapper.countConfirmedRequests(event.getRequests()) < event.getParticipantLimit()
+                        event.getConfirmedRequests() < event.getParticipantLimit()
                 ).map(EventMapper::toEventShortDto).collect(Collectors.toList());
             }
             if (sort != null) {

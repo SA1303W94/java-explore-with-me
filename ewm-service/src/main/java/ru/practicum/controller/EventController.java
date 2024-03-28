@@ -31,14 +31,14 @@ public class EventController {
 
     @GetMapping("/users/{userId}/events")
     public List<EventShortDto> getByUserId(@PathVariable("userId") @Positive Long userId,
-                                           @PositiveOrZero @RequestParam(defaultValue = "0") int from,
-                                           @Positive @RequestParam(defaultValue = "10") int size) {
+                                           @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                           @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("GET events with userId = {}, from = {}, size = {}", userId, from, size);
         return eventService.getEvents(userId, from, size);
     }
 
     @GetMapping("/users/{userId}/events/{eventId}")
-    public EventFullDto getById(@PathVariable("userId")@Positive Long userId,
+    public EventFullDto getById(@PathVariable("userId") @Positive Long userId,
                                 @PathVariable("eventId") @Positive Long eventId) {
         log.info("GET event with userId = {}, eventId = {}", userId, eventId);
         return eventService.getEventById(userId, eventId);
@@ -58,8 +58,8 @@ public class EventController {
                                                @RequestParam(required = false) List<Long> categories,
                                                @RequestParam(required = false) String rangeStart,
                                                @RequestParam(required = false) String rangeEnd,
-                                               @RequestParam(defaultValue = "0") int from,
-                                               @RequestParam(defaultValue = "10") int size) {
+                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                               @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("GET all events from = {}, size = {}, users = {}, states = {}, categories = {}, " +
                 "rangeStart = {}, rangeEnd = {}", from, size, users, states, categories, rangeStart, rangeEnd);
         return eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
@@ -80,13 +80,13 @@ public class EventController {
                                                   @RequestParam(required = false) String rangeEnd,
                                                   @RequestParam(defaultValue = "false") boolean onlyAvailable,
                                                   @RequestParam(required = false) String sort,
-                                                  @RequestParam(defaultValue = "0") int from,
-                                                  @RequestParam(defaultValue = "10") int size,
+                                                  @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                                  @RequestParam(defaultValue = "10") @Positive int size,
                                                   HttpServletRequest request) {
         log.info("GET all published events from = {}, size = {}, text = {}, categories = {}, paid = {}, " +
-                "rangeStart = {}, rangeEnd = {}, onlyAvailable = {}, sort = {}, request = {}",
+                        "rangeStart = {}, rangeEnd = {}, onlyAvailable = {}, sort = {}, request = {}",
                 from, size, text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, request);
-    return eventService.getPublishedEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
+        return eventService.getPublishedEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 sort, from, size, request);
     }
 

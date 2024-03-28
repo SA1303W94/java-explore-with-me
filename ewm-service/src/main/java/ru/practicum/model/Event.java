@@ -5,7 +5,6 @@ import ru.practicum.dto.type.PublicationState;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -68,9 +67,9 @@ public class Event {
     @Column(name = "create_dttm")
     private LocalDateTime createDate;
 
-    @OneToMany(mappedBy = "event")
-    private List<Request> requests;
-
     @Column(name = "views")
     private Long views;
+
+    @Column(name = "confirmedRequests")
+    private Long confirmedRequests;
 }
