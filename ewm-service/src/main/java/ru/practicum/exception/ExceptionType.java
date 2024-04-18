@@ -25,7 +25,10 @@ public enum ExceptionType {
     REQUEST_ALREADY_CANCELED("Запрос с id = %s уже отменен"),
     COMPILATION_NOT_FOUND("Компиляция с id = %s не найдена"),
     STATE_NOT_FOUND("Состояние публикации не найдено для действия события = %s"),
-    START_DATE_IN_PAST("Дата начала события = %s не может быть в прошлом");
+    START_DATE_IN_PAST("Дата начала события = %s не может быть в прошлом"),
+    COMMENT_NOT_FOUND("Комментарий с id = %s не найден"),
+    COMMENT_ALREADY_CONFIRMED("CommentState у комментария уже CONFIRMED"),
+    COMMENT_USER_CONFLICT("Нельзя произвести действие с комментарием другого пользователя");
 
     private final String value;
 }

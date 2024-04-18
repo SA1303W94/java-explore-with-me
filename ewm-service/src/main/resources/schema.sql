@@ -101,3 +101,15 @@ CREATE TABLE IF NOT EXISTS event_compilation (
     event_id BIGINT NOT NULL CONSTRAINT EVENT_COMPILATION_FK REFERENCES events,
     compilation_id BIGINT NOT NULL CONSTRAINT EVENT_COMPILATION_FK_1 REFERENCES compilations
 );
+
+CREATE TABLE IF NOT EXISTS comments
+(
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    created_on          TIMESTAMP NOT NULL,
+    state               VARCHAR(255),
+    text                VARCHAR(512) NOT NULL,
+    updated_on          TIMESTAMP,
+    published_on        TIMESTAMP,
+    author_id           BIGINT NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    event_id            BIGINT NOT NULL REFERENCES events (event_id) ON DELETE CASCADE
+);

@@ -9,6 +9,7 @@ import ru.practicum.dto.CategoryDto;
 import ru.practicum.service.CategoryService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class CategoryController {
 
     @GetMapping("/categories")
     public List<CategoryDto> getAll(@PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                    @PositiveOrZero @RequestParam(defaultValue = "10") Integer size) {
+                                    @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("GET all categories from = {}, size = {}", from, size);
         return categoryService.getAll(from, size);
     }

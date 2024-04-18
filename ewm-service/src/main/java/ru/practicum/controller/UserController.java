@@ -9,6 +9,7 @@ import ru.practicum.dto.UserDto;
 import ru.practicum.groups.Create;
 import ru.practicum.service.UserService;
 
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class UserController {
     @GetMapping
     public List<UserDto> getAll(@RequestParam(required = false) List<Long> ids,
                                 @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                @PositiveOrZero @RequestParam(defaultValue = "10") Integer size) {
+                                @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("GET all users ids = {}, from = {}, size = {}", ids, from, size);
         if (ids != null && !ids.isEmpty()) {
             return userService.getAll(ids, from, size);

@@ -1,7 +1,7 @@
 package ru.practicum.model;
 
 import lombok.*;
-import ru.practicum.dto.RequestDto;
+import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.type.PublicationState;
 
 import javax.persistence.*;

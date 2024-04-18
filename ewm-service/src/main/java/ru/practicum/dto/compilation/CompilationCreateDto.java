@@ -1,4 +1,4 @@
-package ru.practicum.dto;
+package ru.practicum.dto.compilation;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
