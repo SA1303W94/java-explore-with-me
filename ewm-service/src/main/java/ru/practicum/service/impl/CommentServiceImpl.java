@@ -36,7 +36,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto create(Long userId, Long eventId, CommentDto newCommentDto) {
-        log.info("Create comment from user with ID = " + userId + ", for event with ID = " + eventId + ": " + newCommentDto);
+        log.info("Create comment from user with ID = {}, for event with ID = {}, newCommentDto = {}", userId, eventId, newCommentDto);
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         Event event = eventRepository.findByIdAndPublicationState(eventId, PublicationState.PUBLISHED)
@@ -45,14 +45,13 @@ public class CommentServiceImpl implements CommentService {
         comment.setEvent(event);
         comment.setAuthor(user);
         comment.setState(CommentState.PENDING);
-        comment.setCreatedOn(LocalDateTime.now());
         return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CommentDto> getEventComments(Long eventId, int from, int size) {
-        log.info("Get comments for event with ID = " + eventId);
+        log.info("Get comments for event with ID = {}", eventId);
         Event event = eventRepository.findByIdAndPublicationState(eventId, PublicationState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException(String.format(EVENT_NOT_FOUND.getValue(), eventId)));
         List<Comment> comments = commentRepository.findByEvent(event, PageRequest.of(from / size, size));
@@ -62,14 +61,14 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public CommentDto getById(Long commentId) {
-        log.info("Get comment by ID = " + commentId);
+        log.info("Get comment by ID = {}", commentId);
         return CommentMapper.toCommentDto(commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(String.format(COMMENT_NOT_FOUND.getValue(), commentId))));
     }
 
     @Override
     public CommentDto update(Long userId, Long commentId, CommentDto newCommentDto) {
-        log.info("Update comment with ID = " + commentId + " from user with ID = " + userId + ": " + newCommentDto);
+        log.info("Update comment with ID = {} from user with ID = {} , newCommentDto = {}", userId, commentId, newCommentDto);
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         Comment comment = commentRepository.findById(commentId)
@@ -88,7 +87,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void delete(Long userId, Long commentId) {
-        log.info("Delete comment with ID = " + commentId + " from user with ID = " + userId);
+        log.info("Delete comment with ID = {} from user with ID = {}", commentId,userId);
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format(USER_NOT_FOUND.getValue(), userId)));
         Comment comment = commentRepository.findById(commentId)
@@ -104,7 +103,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto updateCommentStatusByAdmin(Long commentId, boolean isConfirm) {
-        log.info("Confirm/reject comment with ID = " + commentId + ". New state: " + isConfirm);
+        log.info("Confirm/reject comment with ID = {}. New state: {}", commentId,isConfirm);
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(String.format(COMMENT_NOT_FOUND.getValue(), commentId)));
         if (isConfirm) {

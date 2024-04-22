@@ -1,6 +1,7 @@
 package ru.practicum.model;
 
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.dto.type.CommentState;
 
 import javax.persistence.*;
@@ -34,6 +35,7 @@ public class Comment {
     private CommentState state;
 
     @Column(name = "created_on")
+    @CreationTimestamp
     private LocalDateTime createdOn;
 
     @Column(name = "updated_on")
