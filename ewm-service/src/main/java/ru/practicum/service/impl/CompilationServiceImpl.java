@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.dto.CompilationCreateDto;
-import ru.practicum.dto.CompilationDto;
-import ru.practicum.dto.CompilationUpdateDto;
+import ru.practicum.dto.compilation.CompilationCreateDto;
+import ru.practicum.dto.compilation.CompilationDto;
+import ru.practicum.dto.compilation.CompilationUpdateDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.model.Compilation;
@@ -31,6 +31,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventRepository eventRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<CompilationDto> getAll(Boolean pinned, int from, int size) {
         log.info("Getting collections of events by parameters: pinned = {} from = {}, size = {}", pinned, from, size);
         List<Compilation> compilations;
@@ -40,6 +41,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CompilationDto getById(Long id) {
         log.info("Getting a selection of events by ID = " + id);
         return CompilationMapper.toCompilationDto(compilationRepository.findById(id)

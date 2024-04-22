@@ -1,7 +1,8 @@
 package ru.practicum.model;
 
 import lombok.*;
-import ru.practicum.dto.RequestDto;
+import org.hibernate.annotations.CreationTimestamp;
+import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.type.PublicationState;
 
 import javax.persistence.*;
@@ -67,6 +68,7 @@ public class Event {
     private LocalDateTime publicationDate;
 
     @Column(name = "create_dttm")
+    @CreationTimestamp
     private LocalDateTime createDate;
 
     @Column(name = "views")

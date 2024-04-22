@@ -3,9 +3,10 @@ package ru.practicum.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.dto.RequestDto;
-import ru.practicum.dto.RequestStatusDto;
-import ru.practicum.dto.RequestStatusUpdateDto;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.dto.request.RequestDto;
+import ru.practicum.dto.request.RequestStatusDto;
+import ru.practicum.dto.request.RequestStatusUpdateDto;
 import ru.practicum.dto.type.PublicationState;
 import ru.practicum.dto.type.RequestStatus;
 import ru.practicum.exception.NotFoundException;
@@ -19,7 +20,6 @@ import ru.practicum.repository.RequestRepository;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.service.RequestService;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +31,7 @@ import static ru.practicum.exception.ExceptionType.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
@@ -57,10 +58,6 @@ public class RequestServiceImpl implements RequestService {
         if (event.getParticipantLimit() != 0 && requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED) >= event.getParticipantLimit()) {
             throw new ValidationConflictException(String.format(REACHED_PARTICIPANT_LIMIT.getValue()));
         }
-//        if (event.getRequestModeration()) {
-//            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
-//            eventRepository.save(event);
-//        }
         RequestStatus status = RequestStatus.PENDING;
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             status = RequestStatus.CONFIRMED;
@@ -85,6 +82,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RequestDto> getAll(Long userId) {
         log.info("Getting information about the current user's requests to participate in other people's events: " +
                 "user_id = {}", userId);
@@ -98,6 +96,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RequestDto> getRequestsForUserEvent(Long userId, Long eventId) {
         log.info("Getting information about requests to participate in the event of the current user: " +
                 "user_id = {}, event_id = {}", userId, eventId);
@@ -112,7 +111,6 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    @Transactional
     public RequestStatusDto changeRequestsStatus(Long userId, Long eventId,
                                                  RequestStatusUpdateDto eventRequestStatusUpdateRequest) {
         log.info("Changing the status (confirmed, canceled) of applications for participation " +

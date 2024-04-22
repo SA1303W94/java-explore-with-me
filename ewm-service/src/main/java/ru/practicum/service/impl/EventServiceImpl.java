@@ -61,7 +61,6 @@ public class EventServiceImpl implements EventService {
             throw new ValidationConflictException(String.format(EVENT_UNAVAILABLE_FOR_EDITING.getValue()));
         }
         event.setCategory(category);
-        event.setCreateDate(LocalDateTime.now());
         event.setInitiator(user);
         event.setPublicationState(PENDING);
         event.setLocation(locationRepository.save(LocationMapper.mapToEntity(newEventDto.getLocation())));
