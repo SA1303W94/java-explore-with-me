@@ -5,7 +5,6 @@ Template repository for ExploreWithMe project.
 Бэкенд приложения **ExploreWithMe** (англ. «исследуй со мной»). Дает возможность делиться информацией об интересных событиях и помогает найти компанию для участия в них.
 
 Приложение является афишей, где можно предложить какое-либо событие и набрать компанию для участия в нём.
-![main front](./front%20page.png)
 
 ### Стек:
 Java, Spring Boot, SQL, PostgreSQL, JPA, Hibernate, Maven, Docker.
